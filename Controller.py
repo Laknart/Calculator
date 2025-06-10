@@ -23,30 +23,30 @@ class Controller:
 
     def add_digit(self, digit):
         if self.flag_next:
-            if self.flag_state_equals:
-                if not self.model.get_number_input() or self.flag_equals:
-                    self.view.set_entry_input("")
-                    self.flag_equals = False
-                value = self.view.get_entry_input() + str(digit)
-                if value[0] != "0":
-                    self.view.set_entry_input(value)
-                    self.model.set_number_input(self.view.get_entry_input())
-                else:
-                    self.view.set_entry_input(digit)
-                    self.model.set_number_input(str(digit))
-            else:
+            if not self.flag_state_equals:
                 self.del_all()
                 self.flag_state_equals = True
-                self.add_digit(digit)
+                print("Tut1")
+
+            if not self.model.get_number_input(): #or self.flag_equals:
+                self.view.set_entry_input("")
+                self.flag_equals = False
+            value = self.view.get_entry_input() + str(digit)
+            if value[0] != "0":
+                self.view.set_entry_input(value)
+                self.model.set_number_input(self.view.get_entry_input())
+            else:
+                self.view.set_entry_input(digit)
+                self.model.set_number_input(str(digit))
+
 
         else:
             self.del_all()
-            self.flag_next = True
             self.add_digit(digit)
 
     def count_number(self, sign, x, y):
         value = self.model.perform_operation(sign, x, y)
-        if value:
+        if value is not None:
             return value
         else:
             self.flag_next = False
@@ -83,6 +83,11 @@ class Controller:
             self.model.set_number_two("")
             self.model.set_number_input("")
             self.renewal_sign("")
+            self.flag_next = True
+            self.flag_equals = False
+            self.flag_state_equals = True
+
+
         else:
             self.view.bell()
 
@@ -130,11 +135,12 @@ class Controller:
         self.renewal_sign(sign)
 
     def calculate_and_set_result(self, sign):
-        value = self.count_number(self.model.get_sign(), self.model.get_number_two(),
+        value = self.count_number(sign, self.model.get_number_two(),
                                   self.model.get_number_input())
-        if not value:
+        if not value is not None:
             return
         self.flag_equals = True
+        print("Tut")
         self.model.set_number_two(value)
         self.view.set_entry_two(f"{value} {sign}")
         self.renewal_sign(sign)
@@ -160,23 +166,24 @@ class Controller:
         if self.are_inputs_empty():
             self.view.set_entry_two(f"{0} =")
             self.model.set_number_two(0)
+            self.model.set_sign("=")
         elif (self.check_template1(self.view.get_entry_two()) and self.view.get_entry_input()
               and not self.model.get_sign() in self.model.get_sign_allowed()):
             self.view.set_entry_two(f"{self.view.get_entry_input()} =")
             self.model.set_number_two(self.view.get_entry_input())
             self.model.set_number_input("")
-        elif not self.are_inputs_empty() and self.model.get_number_input() and not self.flag_equals:
-            self.equals_count()
-            self.flag_state_equals = False
         elif self.view.get_entry_input() and not self.view.get_entry_two():
             self.view.set_entry_two(f"{self.view.get_entry_input()} =")
             self.model.set_number_two(self.view.get_entry_input())
             self.model.set_number_input("")
+        elif not self.are_inputs_empty() and self.model.get_number_input() is not None and not self.flag_equals:
+            self.equals_count()
+            self.flag_state_equals = False
         elif not self.model.get_number_input() and self.view.get_entry_input() and self.view.get_entry_two():
             self.model.set_number_input(self.model.get_number_two())
             self.equals_count()
             self.flag_state_equals = False
-
+            self.flag_equals = False
 
     def check_template1(self, value):
         try:
@@ -201,7 +208,7 @@ class Controller:
 
     def equals_count(self):
         value = self.count_number(self.model.get_sign(), self.model.get_number_two(), self.model.get_number_input())
-        if not value:
+        if not value is not None:
             return
         self.view.set_entry_two(
             f"{self.model.get_number_two()} {self.model.get_sign()} {self.model.get_number_input()} =")

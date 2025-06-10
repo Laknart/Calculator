@@ -50,20 +50,20 @@ class Model:
         x = float(x)
         y = float(y)
         if sign == "+":
-            return self.is_float(self.sum_digit(x, y))
+            return self.conversion_float(self.sum_digit(x, y))
         elif sign == "-":
-            return self.is_float(self.minus_digit(x, y))
+            return self.conversion_float(self.minus_digit(x, y))
         elif sign == "x":
-            return self.is_float(self.multi_digit(x, y))
+            return self.conversion_float(self.multi_digit(x, y))
         elif sign == "/":
             if float(y) == 0:
-                return False
-            return self.is_float(self.division_digit(x,y))
-        return False
+                return None
+            return self.conversion_float(self.division_digit(x,y))
+        return None
 
 
     @staticmethod
-    def is_float(x):
+    def conversion_float(x):
         if int(x) == float(x):
             return int(x)
         else:
